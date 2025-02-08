@@ -169,3 +169,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+console_player_tools/*.exe
+/垃圾桶/*
