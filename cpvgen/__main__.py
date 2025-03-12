@@ -1,4 +1,4 @@
-import sys, os, stat, curses, asyncio, tqdm
+import sys, os,asyncio
 cli=False
 try:
     import easygui
@@ -15,6 +15,7 @@ async def main():
     else:
         inputVideo = ""
         outputCPVid = ""
+        print("CLI用法：python -m cpvgen <输入的视频> <cpv/cpvt/zip保存路径>")
     path = os.path.dirname(os.path.abspath(__file__))
     mode=False
     h=480
@@ -33,10 +34,11 @@ async def main():
             if not os.path.exists(temp):
                 os.makedirs(temp, exist_ok=True)
 
+
     if inputVideo == "" or outputCPVid == "":
         if cli:
             inputVideo = input("输入视频路径：")
-            outputCPVid = input("输入cpvid文件保存路径：")
+            outputCPVid = input("输入(cpv,cpvt,zip)文件保存路径：")
             if not (inputVideo and outputCPVid):
                 print("输入不能为空")
                 return 1
@@ -46,13 +48,20 @@ async def main():
             inputVideo = easygui.fileopenbox("请选择视频文件", "选择视频文件", filetypes=["*.mp4", "*.avi", "*.mkv", "*.flv", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m3u8", "*.m3u", "*.*"],default="*.mp4")
             if not inputVideo:
                 return 0
-            outputCPVid = easygui.filesavebox("请选择cpvid文件保存路径", "选择cpvid文件保存路径", filetypes=["*.cpvid","*.zip","*.*"], default="output.cpvid")
+            outputCPVid = easygui.filesavebox("请选择cpvid文件保存路径", "选择cpvid文件保存路径", filetypes=["*.cpv","cpvt","*.zip","*.*"], default="output.cpv")
             if not outputCPVid:
                 return 0
+    if outputCPVid.endswith(".cpv"):
+        mode="cpv"
+    elif outputCPVid.endswith(".cpvt"):
+        mode="cpvt"
+        h=50
+    elif outputCPVid.endswith(".zip"):
+        mode="dp"
+        h=64
+    else:
+        mode="cpv"
     if cli:
-        if input("是否生成Minecraft数据包文件? (y/N):")=="y":
-                mode=True
-                h=64
         inp=input("视频高度({})".format(h))
         if inp:
             try:
@@ -68,9 +77,6 @@ async def main():
                 print("输入错误")
                 return 1
     else:
-        if easygui.ynbox("是否生成Minecraft数据包文件?"):
-                mode=True
-                h=64
         inp=easygui.enterbox("视频高度({})".format(h))
         if inp:
             try:
@@ -101,4 +107,8 @@ async def main():
     easygui.msgbox("完成","cpvid生成器")
     return 0
 
-sys.exit(asyncio.run(main()))
+def run():
+    sys.exit(asyncio.run(main()))
+
+if __name__ == "__main__":
+    run()
