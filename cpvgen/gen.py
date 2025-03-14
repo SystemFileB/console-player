@@ -1,4 +1,4 @@
-import subprocess as sp, os, shutil, py7zr, asyncio, json, sys
+import subprocess as sp, os, shutil, py7zr, asyncio, json
 from colorama import Cursor,init
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
@@ -27,7 +27,7 @@ async def compress_directory(directory_path, output_path):
                     file_path = os.path.join(root, file)
                     archive.write(file_path, os.path.relpath(file_path, directory_path))
                     pbar.update(1)
-async def gen(input,output,mode,height,fps,temp):
+async def gen(input,output,mode,height,fps,temp,max_workers=None,xz=False):
     ffmpeg=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/console_player_tools/ffmpeg.exe"
     if not os.path.exists(ffmpeg):
         ffmpeg="ffmpeg"
@@ -70,8 +70,11 @@ async def gen(input,output,mode,height,fps,temp):
         manifest={
             "frames":len(os.listdir(os.path.join(temp,"frames"))),
             "fps":fps, 
-            "type":mode
+            "type":mode,
+            "xz":xz
         }
+        if mode=="cpvt":
+            manifest["height"]=height
         json.dump(manifest,f)
         f.close()
 
@@ -80,21 +83,41 @@ async def gen(input,output,mode,height,fps,temp):
         #os.makedirs(os.path.join(temp,"datapack","data"),exist_ok=True)
     elif mode=="cpvt":
         frames = []
-        with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             with tqdm(total=manifest["frames"], unit='frame', desc="预处理所有帧", colour="green") as pbar:
                 # 修改路径生成方式，使用os.path处理路径
                 frame_paths = [os.path.join(temp, "frames", f"{i}.jpg") for i in range(1, manifest["frames"] + 1)]
                 
-                # 修改处理逻辑，同时处理原始路径和结果
-                for frame_path, result in zip(frame_paths, executor.map(lambda a: process_frame(a,th=height), frame_paths)):
-                    # 生成对应的txt文件路径
+                # 分批处理帧数据，每批50个任务
+                chunk_size = 50
+                futures = []
+                for i, path in enumerate(frame_paths):
+                    futures.append(executor.submit(process_frame, path, th=height, xz=xz))
+                    # 每积累一定数量的任务就等待完成
+                    if (i + 1) % chunk_size == 0:
+                        for future, frame_path in zip(futures, frame_paths[i-chunk_size+1:i+1]):
+                            result = future.result()
+                            if xz:
+                                txt_path = os.path.splitext(frame_path)[0] + ".txt.xz"
+                                with open(txt_path, "wb") as f:
+                                    f.write(result)
+                                    f.close()
+                            else:
+                                txt_path = os.path.splitext(frame_path)[0] + ".txt"
+                                with open(txt_path, "w", encoding="utf-8") as f:
+                                    f.write(result)
+                                    f.close()
+                            os.unlink(frame_path)
+                            pbar.update(1)
+                        futures = []
+                        await asyncio.sleep(0)  # 释放事件循环
+                
+                # 处理剩余任务
+                for future, frame_path in zip(futures, frame_paths[-len(futures):]):
+                    result = future.result()
                     txt_path = os.path.splitext(frame_path)[0] + ".txt"
-                    
-                    # 写入处理后的文本文件
                     with open(txt_path, "w", encoding="utf-8") as f:
                         f.write(result)
-                    
-                    # 删除原始jpg文件
                     os.unlink(frame_path)
                     pbar.update(1)
     await asyncio.sleep(0.5)

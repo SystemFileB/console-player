@@ -1,4 +1,4 @@
-import sys, os,asyncio
+import sys, os,asyncio, shutil
 cli=False
 try:
     import easygui
@@ -15,7 +15,15 @@ async def main():
     else:
         inputVideo = ""
         outputCPVid = ""
-        print("CLI用法：python -m cpvgen <输入的视频> <cpv/cpvt/zip保存路径>")
+    if len(sys.argv) == 4 and sys.argv[3].startswith("-mw="):
+        max_workers = int(sys.argv[3][4:])
+    elif len(sys.argv) == 2 and sys.argv[1].startswith("-mw="):
+        max_workers = int(sys.argv[1][4:])
+    else:
+        max_workers = os.cpu_count()
+    print("最大工作线程数:", max_workers)
+    if len(sys.argv) == 1:
+        print("CLI用法：python -m cpvgen <输入的视频> <cpv/cpvt/zip保存路径> [-mw=最大工作线程，仅限cpvt文件的保存]")
     path = os.path.dirname(os.path.abspath(__file__))
     mode=False
     h=480
@@ -45,17 +53,23 @@ async def main():
             
 
         else:
-            inputVideo = easygui.fileopenbox("请选择视频文件", "选择视频文件", filetypes=["*.mp4", "*.avi", "*.mkv", "*.flv", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m3u8", "*.m3u", "*.*"],default="*.mp4")
+            inputVideo = easygui.fileopenbox("请选择视频文件", "选择视频文件", filetypes=[["*.mp4;*.avi;*.mkv;*.flv;*.mov;*.wmv;*.ts;*.webm","FFmpeg支持的文件 (*.mp4;*.avi;*.mkv;*.flv;*.mov;*.wmv;*.ts;*.webm)"], 
+                                                                                        ["*.*","所有文件 (*.*)"]])
             if not inputVideo:
                 return 0
-            outputCPVid = easygui.filesavebox("请选择cpvid文件保存路径", "选择cpvid文件保存路径", filetypes=["*.cpv","cpvt","*.zip","*.*"], default="output.cpv")
+            outputCPVid = easygui.filesavebox("请选择cpvid文件保存路径", "选择cpvid文件保存路径", filetypes=[["*.cpv","保存为jpg图片的，可随终端拉伸的ConsolePlay文件 (*.cpv)"],
+                                                                                                          ["*.cpvt","保存为txt文本的，不可拉伸但加载快的ConsolePlayText文件 (*.cpvt)"],
+                                                                                                          ["*.zip","可在Minecraft播放的数据包和资源包文件 (未完工, *.zip)"],
+                                                                                                          ["*.*","所有文件 (*.*)"]
+                                                                                                         ], default="output.cpvt")
             if not outputCPVid:
-                return 0
+                return 1
     if outputCPVid.endswith(".cpv"):
         mode="cpv"
+        h=480
     elif outputCPVid.endswith(".cpvt"):
         mode="cpvt"
-        h=50
+        h=shutil.get_terminal_size().lines
     elif outputCPVid.endswith(".zip"):
         mode="dp"
         h=64
@@ -91,6 +105,30 @@ async def main():
             except:
                 easygui.msgbox("输入错误")
                 return 1
+    xz=False
+    if mode=="cpvt":
+        if h>=150:
+            text=("你给的视频高度太大，可能会导致播放时卡顿 (除非你的终端性能很好)\n如果你愿意的话，可以打开帧的XZ压缩，让每个帧文件变小\n要压缩每一个帧吗 (Y/n):",True)
+        else:
+            text=("你要不要为每一个帧使用XZ压缩 (y/N):",False)
+
+        if cli:
+            inp=input(text[0])
+        else:
+            inp=easygui.ynbox(text[0])
+            if inp==None:
+                inp=""
+            elif inp:
+                inp="y"
+            else:
+                inp="n"
+
+        if inp=="Y" or inp=="y":
+            xz=True
+        elif inp=="N" or inp=="n":
+            xz=False
+        else:
+            xz=text[1]
     if os.path.exists(outputCPVid):
         if cli:
             if input("文件已存在，是否覆盖并继续? (y/N):")=="y":
@@ -103,7 +141,7 @@ async def main():
             else:
                 return 0
     from .gen import gen
-    await gen(inputVideo, outputCPVid, mode, h, fps, temp)
+    await gen(inputVideo, outputCPVid, mode, h, fps, temp, max_workers, xz)
     easygui.msgbox("完成","cpvid生成器")
     return 0
 

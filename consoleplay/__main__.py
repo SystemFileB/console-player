@@ -49,10 +49,13 @@ def main():
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         with tqdm(total=framesCount, unit='frame', desc="预处理所有帧", colour="green") as pbar:
             if manifest["type"]=="cpvt":
-                frame_paths = [files[f"frames/{i}.txt"] for i in range(1, framesCount + 1)]
+                if manifest["xz"]:
+                    frame_paths = [files[f"frames/{i}.txt.xz"] for i in range(1, framesCount + 1)]
+                else:
+                    frame_paths = [files[f"frames/{i}.txt"] for i in range(1, framesCount + 1)]
             elif manifest["type"]=="cpv":
                 frame_paths = [files[f"frames/{i}.jpg"] for i in range(1, framesCount + 1)]
-            for result in executor.map(lambda a: process_frame(a,manifest["type"]=="cpvt"), frame_paths):
+            for result in executor.map(lambda a: process_frame(a,manifest["type"]=="cpvt"), frame_paths,xz=manifest["xz"]):
                 frames.append(result)
                 pbar.update(1)
     cpvid.close()
