@@ -1,4 +1,6 @@
-import sys, os,asyncio, shutil
+import sys, os,asyncio, shutil, json
+from consoleplay import version
+__version__=version
 cli=False
 try:
     import easygui
@@ -41,7 +43,28 @@ async def main():
             temp = os.path.join(os.path.expanduser("~"), ".SystemFileB", "cpvid_generator")
             if not os.path.exists(temp):
                 os.makedirs(temp, exist_ok=True)
-
+    if os.path.exists(os.path.join(temp,"process.json")):
+        if cli:
+            inp=input("检测到上次未完成的任务，是否继续？ (Y/n)")=="y"
+        else:
+            inp=easygui.ynbox("检测到上次未完成的任务，是否继续？")
+        if inp:
+            with open(os.path.join(temp,"process.json"),"r",encoding="utf-8") as f:
+                process_json=json.load(f)
+                inputVideo=process_json["argments"]["input"]
+                outputCPVid=process_json["argments"]["output"]
+                mode=process_json["argments"]["mode"]
+                h=process_json["argments"]["height"]
+                fps=process_json["argments"]["fps"]
+                temp=process_json["argments"]["temp"]
+                max_workers=process_json["argments"]["max_workers"]
+                xz=process_json["argments"]["xz"]
+                f.close()
+            from .gen import gen
+            await gen(inputVideo, outputCPVid, mode, h, fps, temp, max_workers, xz)
+            easygui.msgbox("完成","cpvid生成器")
+            return 0
+            
 
     if inputVideo == "" or outputCPVid == "":
         if cli:

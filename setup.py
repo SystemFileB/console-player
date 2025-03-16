@@ -1,15 +1,42 @@
 import setuptools
+from consoleplay import version
+import sys,shutil
+shutil.rmtree("build",ignore_errors=True)
+
+# 处理自定义参数前先复制原始参数
+original_argv = sys.argv.copy()
+sys.argv = [arg for arg in sys.argv if not (arg.startswith("--have-ffmpeg") or arg.startswith("--linux"))]
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+name="console-player-noffmpeg"
+package_data={}
+options={
+        'bdist_wheel': {
+            'plat_name': 'win_amd64',  # 显式指定平台名称
+        }
+    }
+
+# 使用原始参数列表进行判断
+packages=["cpvgen","consoleplay","consolepic"]
+if "--have-ffmpeg" in original_argv:
+    packages.append("console_player_tools")
+    package_data={'console_player_tools': ['ffmpeg.exe']}
+    name="console-player"
+if "--linux" in original_argv:
+    name="console-player"
+    options={}
+
 setuptools.setup(
-    name="console_player",
-    version="1.00",
+    name=name,
+    version=version,
     author="SystemFileB",
     description="让终端可以播放视频！",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="github.com/SystemFileB/console-player",
-    packages=["cpvid_gen","consoleplay","console_player_tools"],
+    url="https://github.com/SystemFileB/console-player",
+    packages=packages,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)", 
@@ -22,9 +49,15 @@ setuptools.setup(
         "pygame"
     ],
     platforms=["Windows"],
+    options=options,
     entry_points={
-       "cpvid_gen": "cpvid_gen.__main__:run",
-       "consoleplay": "consoleplay.__main__:run",
+    "console_scripts": [
+        "cpvgen = cpvgen.__main__:run",
+        "consoleplay = consoleplay.__main__:main",
+        "consolepic = consolepic.__main__:main"
+    ]
     },
     license="LGPLv3",
+    include_package_data=True,
+    package_data=package_data
 )

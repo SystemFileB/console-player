@@ -5,20 +5,32 @@ from PIL import Image
 from typing import IO, Union
 StrOrBytesPath = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 
+version="1.00"
+__version__=version
+
 tsize=shutil.get_terminal_size()
 init()
 
-def RGB(r, g, b):
-    """生成终端RGB背景色转义序列（48表示背景色，2表示真彩色模式）"""
+def RGB(r, g, b, a=255):
+    """在要输出的文本前面加上这个，让文本的颜色变成对应的RGBA~"""
+    if a == 0:
+        return "\033[0m"  # 重置所有样式（模拟完全透明）
+    elif a < 255:
+        # 混合到黑色背景的透明度效果（示例实现）
+        blend_factor = a / 255
+        r = int(r * blend_factor)
+        g = int(g * blend_factor)
+        b = int(b * blend_factor)
     return f"\033[48;2;{r};{g};{b}m"
 
-def pic2terminal(frame, lore=False,cursor_move=False,th=None):
+def pic2terminal(frame, lore=False,cursor_move=False,th=None,try_rgba=False):
     """将图片转化为终端可显示的字符串，只支持RGB而不支持带透明度的图片
     ### 参数
     - frame: 图片路径，可以是Pillow支持的任何格式
     - lore: 是否在移动光标的时候往上多移动一行
     - cursor_move: 是否移动光标
     - th: 生成的图片高度，如果没有指定就按照终端高度生成
+    - try_rgba: 是否尝试使用RGBA模式，如果失败就使用RGB模式
     ### 用法
     ```python
     import consoleplay as cp
@@ -27,7 +39,13 @@ def pic2terminal(frame, lore=False,cursor_move=False,th=None):
     这里仅包含了一般图片的转化，理论上io.BytesIO和bytes格式也可以"""
     img = Image.open(frame)
     # 转换为RGB模式来支持终端显示
-    img = img.convert('RGB')
+    if try_rgba and img.format in ("PNG", "WEBP", "TIFF"):
+        try:
+            img = img.convert('RGBA')
+        except:
+            img = img.convert('RGB')
+    else:
+        img = img.convert('RGB')
     
     width, height = img.size
     # 计算终端可用空间（宽度按字符数/2，高度保留3行给其他内容）
@@ -49,8 +67,12 @@ def pic2terminal(frame, lore=False,cursor_move=False,th=None):
     for y in range(height):
         for x in range(width):
             # 每个像素用两个空格字符表示（保持正确宽高比）
-            r, g, b = img.getpixel((x, y))
-            print_str+=RGB(r, g, b) + "  "+Style.RESET_ALL
+            if img.mode == "RGBA":
+                r, g, b, a = img.getpixel((x, y))
+            else:
+                r, g, b = img.getpixel((x, y))
+                a=255
+            print_str+=RGB(r, g, b, a) + "  "+Style.RESET_ALL
         print_str+="\n"  # 行结束换行
     
     # 根据参数添加光标控制序列
