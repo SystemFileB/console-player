@@ -2,10 +2,12 @@ import setuptools
 from consoleplay import version
 import sys,shutil
 shutil.rmtree("build",ignore_errors=True)
+shutil.rmtree("console_player.egg-info",ignore_errors=True)
+shutil.rmtree("console_player_noffmpeg.egg-info",ignore_errors=True)
 
 # 处理自定义参数前先复制原始参数
 original_argv = sys.argv.copy()
-sys.argv = [arg for arg in sys.argv if not (arg.startswith("--have-ffmpeg") or arg.startswith("--linux"))]
+sys.argv = [arg for arg in sys.argv if not (arg.startswith("--have-ffmpeg") or arg.startswith("--linux") or arg.startswith("--mac") or arg.startswith("--others"))]
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -14,9 +16,10 @@ name="console-player-noffmpeg"
 package_data={}
 options={
         'bdist_wheel': {
-            'plat_name': 'win_amd64',  # 显式指定平台名称
+            'plat_name': 'any',  # 显式指定平台名称
         }
     }
+platforms=["Windows"]
 
 # 使用原始参数列表进行判断
 packages=["cpvgen","consoleplay","consolepic"]
@@ -24,9 +27,14 @@ if "--have-ffmpeg" in original_argv:
     packages.append("console_player_tools")
     package_data={'console_player_tools': ['ffmpeg.exe']}
     name="console-player"
-if "--linux" in original_argv:
+    options["bdist_wheel"]["plat_name"]="win_amd64"
+if "--others" in original_argv:
+    platforms=["Windows","Linux","macOS"]
+    options["bdist_wheel"]["plat_name"]="any"
     name="console-player"
-    options={}
+
+if "sdist" in original_argv:
+    name="console-player"
 
 setuptools.setup(
     name=name,

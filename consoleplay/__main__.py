@@ -98,7 +98,7 @@ def main():
             if input("已暂停，回车继续，'q'退出: ")=="q":
                 break
             else:
-                print(Cursor.UP(tsize.lines),end="")
+                clear_screen()
                 mixer.music.unpause()
     frames=None
     clear_screen()
