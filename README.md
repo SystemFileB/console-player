@@ -2,7 +2,7 @@
 视频播放器，但终端  
 这个项目包含了[FFmpeg](https://ffmpeg.org/)的LGPL构建
 
-这个项目的图标使用到了[Iconpark](https://iconpark.oceanengine.com/official)的三角形图标
+这个项目的图标使用到了[Iconpark](https://iconpark.oceanengine.com/official)的三角形图标，这个部分使用[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)授权
 
 ## 📦 安装
 ```bash
