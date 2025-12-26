@@ -80,11 +80,11 @@ $ python setup.py bdist_wheel --mac
 接着，往`manifest.json`以这个格式写入内容  
 ```json
 {
-  "frames": 视频帧数，填入数字，比如3500,
-  "fps": 视频的帧率，填入数字，要和frames和音频长度吻合，否则播放报错，比如20,
-  "type": 视频类型，比如"cpvt"或"cpv",
-  "xz": 你的cpvt类型的文件是否使用了xz压缩，填true或false,
-  "height": 视频高度，暂时没有实现，比如60
+  "frames":, //视频帧数，填入数字，比如3500
+  "fps":, //视频的帧率，填入数字，要和frames和音频长度吻合，否则播放报错，比如20
+  "type":, //视频类型，比如"cpvt"或"cpv"
+  "xz":, //你的cpvt类型的文件是否使用了xz压缩，填true或false
+  "height":, //视频高度，暂时没有实现，比如60
 }
 ```
 
