@@ -36,7 +36,7 @@ async def compress_directory(directory_path, output_path):
                     pbar.update(1)
 async def ffmpeg_processer(input,temp,height,fps,mode) -> bool:
     ffmpeg=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/console_player_tools/ffmpeg.exe"
-    if not os.path.exists(ffmpeg):
+    if not os.path.exists(ffmpeg) or os.name=="posix":
         ffmpeg="ffmpeg"
 
     os.makedirs(os.path.join(temp,"frames"),exist_ok=True)

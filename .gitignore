@@ -173,3 +173,4 @@ cython_debug/
 console_player_tools/*.exe
 /垃圾桶/*
 /cpvgen/temp
+.marscode

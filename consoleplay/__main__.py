@@ -1,7 +1,8 @@
-import sys, os, time, shutil, py7zr, json
+import sys, os, time, shutil, py7zr, json, io
 from colorama import Fore, Style, Cursor, init
 from concurrent.futures import ThreadPoolExecutor
 from . import process_frame,pic2terminal,version
+from py7zr.io import BytesIOFactory
 
 __version__=version
 
@@ -15,14 +16,15 @@ def clear_screen():
 def main():
     from tqdm import tqdm
     if len(sys.argv) < 2:
-        versionstr=pic2terminal(os.path.join(path,"consoleplay","icon.png"),th=19,try_rgba=True).split("\n")
-        versionstr[0]+=f"  ConsolePlay {version}"
-        versionstr[1]+="  By: SystemFileB和其他贡献者们"
-        versionstr[2]+="  赞助: https://afdian.com/a/systemfileb"
-        versionstr[3]+="  Github: https://github.com/SystemFileB/console-player"
-        versionstr[4]+="  用法: python -m consoleplay <视频路径> [-mw=<最大工作线程数>]"
-        print("\n".join(versionstr))
-        sys.exit(0)
+        print(f"""╭───────────────────╮  ConsolePlay {version}
+│ {Fore.BLUE}│╲{Fore.RESET}                │  By: SystemFileB和其他贡献者们
+│ {Fore.BLUE}│  ╲{Fore.RESET}              │  赞助: https://afdian.com/a/systemfileb
+│ {Fore.BLUE}│    ╲{Fore.RESET}            │  Github: https://github.com/SystemFileB/console-player
+│ {Fore.BLUE}│    ╱{Fore.RESET}            │  用法: python -m consoleplay <视频路径> [-mw=<最大工作线程数>]
+│ {Fore.BLUE}│  ╱{Fore.RESET}              │
+│ {Fore.BLUE}│╱      ───────{Fore.RESET}   │
+╰───────────────────╯""")
+        sys.exit(1)
     if not os.path.exists(sys.argv[1]):
         print(f"{Fore.RED}E{Style.RESET_ALL}: 视频不存在")
         sys.exit(2)
@@ -35,7 +37,20 @@ def main():
         
     cpvid=py7zr.SevenZipFile(sys.argv[1], 'r')
     print("读取所有文件...")
-    files=cpvid.readall()
+    
+    # 使用py7zr提供的BytesIOFactory替代readall
+    # 设置一个较大的限制来容纳所有文件
+    factory = BytesIOFactory(limit=1024*1024*1024)  # 1GB限制
+    cpvid.extract(factory=factory)
+    
+    # 获取解压后的文件数据
+    files = {}
+    for filename in factory.products.keys():
+        buffer = factory.get(filename)
+        if buffer:
+            buffer.seek(0)
+            files[filename] = buffer
+    
     manifest=json.load(files["manifest.json"])
     del files["manifest.json"]
     framesCount=manifest["frames"]
@@ -45,11 +60,13 @@ def main():
     try:
         audio=os.path.join(os.path.dirname(os.path.abspath(__file__)),"audio.mp3")
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"audio.mp3"),"wb") as f:
+            files["audio.mp3"].seek(0)
             f.write(files["audio.mp3"].read())
             f.close()
     except:
         audio=os.path.join(os.path.expanduser("~"),"console_player.mp3")
         with open(os.path.join(os.path.expanduser("~"),"console_player.mp3"),"wb") as f:
+            files["audio.mp3"].seek(0)
             f.write(files["audio.mp3"].read())
             f.close()
     mixer.music.load(audio)
@@ -60,8 +77,10 @@ def main():
     cpvid=None
     def processor(a):
         fa=files[a]
+        fa.seek(0)  # 重置文件指针
+        result = process_frame(fa,manifest["type"]=="cpvt",xz=manifest["xz"])
         del files[a]
-        return process_frame(fa,manifest["type"]=="cpvt",xz=manifest["xz"])
+        return result
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         with tqdm(total=framesCount, unit='frame', desc="预处理所有帧", colour="green") as pbar:
             if manifest["type"]=="cpvt":
@@ -70,7 +89,7 @@ def main():
                 else:
                     frame_paths = [f"frames/{i}.txt" for i in range(1, framesCount + 1)]
             elif manifest["type"]=="cpv":
-                frame_paths = [files[f"frames/{i}.jpg"] for i in range(1, framesCount + 1)]
+                frame_paths = [f"frames/{i}.jpg" for i in range(1, framesCount + 1)]
             for result in executor.map(processor, frame_paths):
                 frames.append(result)
                 pbar.update(1)
