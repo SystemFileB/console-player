@@ -4,6 +4,8 @@
 
 这个项目的图标使用到了[Iconpark](https://iconpark.oceanengine.com/official)的三角形图标，这个部分使用[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)授权
 
+使用的相关项目及对应的许可证，见[licenses](licenses)
+
 ## 📦 安装
 ```bash
 # Windows用户没有安装FFmpeg的，或者使用其他系统的
