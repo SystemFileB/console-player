@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import setuptools
 from consoleplay import version
 import sys,shutil
@@ -7,7 +8,7 @@ shutil.rmtree("console_player_noffmpeg.egg-info",ignore_errors=True)
 
 # 处理自定义参数前先复制原始参数
 original_argv = sys.argv.copy()
-sys.argv = [arg for arg in sys.argv if not (arg.startswith("--have-ffmpeg") or arg.startswith("--linux") or arg.startswith("--mac") or arg.startswith("--others"))]
+sys.argv = [arg for arg in sys.argv if not (arg.startswith("--have-ffmpeg") or arg.startswith("--others"))]
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -47,7 +48,7 @@ setuptools.setup(
     packages=packages,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)", 
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)", 
     ],
     install_requires=[
         "py7zr",
@@ -56,7 +57,7 @@ setuptools.setup(
         "colorama",
         "pygame"
     ],
-    platforms=["Windows"],
+    platforms=platforms,
     options=options,
     entry_points={
     "console_scripts": [

@@ -51,11 +51,8 @@ $ python setup.py bdist_wheel --have-ffmpeg
 # Windows不带FFmpeg (注意包名变成了console-player-noffmpeg)
 $ python setup.py bdist_wheel
 
-# Linux
-$ python setup.py bdist_wheel --linux
-
-# MacOS
-$ python setup.py bdist_wheel --mac
+# 类UNIX
+$ python setup.py bdist_wheel --others
 ```
 
 ## 🛠️ CPVID文件的手工生成
@@ -83,17 +80,25 @@ $ python setup.py bdist_wheel --mac
   "frames":, //视频帧数，填入数字，比如3500
   "fps":, //视频的帧率，填入数字，要和frames和音频长度吻合，否则播放报错，比如20
   "type":, //视频类型，比如"cpvt"或"cpv"
-  "xz":, //你的cpvt类型的文件是否使用了xz压缩，填true或false
-  "height":, //视频高度，暂时没有实现，比如60
+  "xz": //你的cpvt类型的文件是否使用了xz压缩，填true或false
 }
 ```
 
 最后，把这个目录的所有内容压缩到7z文件，把后缀一改，搞定！
 
 ## 📝 更新日志
+### 1.03
+- 让线程池在处理帧上更高效
+- 现在在生成`cpv(t)`文件前会检查ffmpeg是否可用
+- 优化`consoleplay`命令在播放大文件时的内存占用
+- 移除了Herobrine
+
 ### 1.02
+- **从此版本开始，使用MPL 2.0许可证，以前的版本使用LGPL 3.0许可证**
 - 适应了`py7zr 1.0.0-rc2`的不兼容更改，它移除了`readall`方法而需要使用`BytesIOFactory`实现
 - 把LOGO显示改成了ASCII艺术
+- 现在FFmpeg在提取帧的时候会使用最近邻插值算法
+- 更新FFmpeg
 
 - 我发现用Python来写这个库会遇到性能瓶颈，所以我未来会写一个C++重写的版本，原Python版本会把后端也改用C++实现  
 

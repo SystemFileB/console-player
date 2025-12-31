@@ -43,7 +43,7 @@ async def main():
             temp = os.path.join(os.path.expanduser("~"), ".SystemFileB", "cpvid_generator")
             if not os.path.exists(temp):
                 os.makedirs(temp, exist_ok=True)
-    if os.path.exists(os.path.join(temp,"process.json")):
+    if False: # os.path.exists(os.path.join(temp,"process.json")): //此处未完工
         if cli:
             inp=input("检测到上次未完成的任务，是否继续？ (Y/n)")=="y"
         else:

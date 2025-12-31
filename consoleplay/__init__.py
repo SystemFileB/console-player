@@ -5,7 +5,7 @@ from PIL import Image
 from typing import IO, Union
 StrOrBytesPath = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 
-version="1.01.1"
+version="1.03"
 __version__=version
 
 tsize=shutil.get_terminal_size()

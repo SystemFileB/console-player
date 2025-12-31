@@ -5,7 +5,7 @@ from consoleplay import process_frame
 manifest={}
 
 async def rm(temp):
-    files = [os.path.join(temp, filename) for filename in os.listdir(temp)]
+    files = [os.path.join(root, filename) for root, _, filenames in os.walk(temp) for filename in filenames]
     if files:
         with tqdm(total=len(files), unit='file', desc="删除文件", colour="green") as pbar:
             for file_path in files:
@@ -41,9 +41,9 @@ async def ffmpeg_processer(input,temp,height,fps,mode) -> bool:
 
     os.makedirs(os.path.join(temp,"frames"),exist_ok=True)
     ffmpeg_frame = [
-        ffmpeg,
+    ffmpeg,
         '-i', input,
-        '-vf', f'scale=-1:{height},fps={fps}',
+        '-vf', f'scale=width=-1:height={height}:flags=neighbor,fps={fps}',
         '-hide_banner',
         f'{temp}/frames/%d.jpg'
     ]
