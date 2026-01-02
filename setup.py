@@ -26,7 +26,7 @@ platforms=["Windows"]
 packages=["cpvgen","consoleplay","consolepic"]
 if "--have-ffmpeg" in original_argv:
     packages.append("console_player_tools")
-    package_data={'console_player_tools': ['ffmpeg.exe']}
+    package_data={'console_player_tools': ['ffmpeg.exe','ffmpeg.exe.license.md']}
     name="console-player"
     options["bdist_wheel"]["plat_name"]="win_amd64"
 if "--others" in original_argv:

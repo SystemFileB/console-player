@@ -1,6 +1,6 @@
 # 🎞️ console-player
 视频播放器，但终端  
-这个项目包含了[FFmpeg](https://ffmpeg.org/)的[LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.en.html)构建
+这个项目包含了[FFmpeg](https://ffmpeg.org/)的[LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.en.html)构建，同时在PyPI版本中FFmpeg还经过UPX压缩过
 
 这个项目的图标使用到了[Iconpark](https://iconpark.oceanengine.com/official)的三角形图标，这个部分使用[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)授权
 
@@ -89,11 +89,16 @@ $ python setup.py bdist_wheel --others
 最后，把这个目录的所有内容压缩到7z文件，把后缀一改，搞定！
 
 ## 📝 更新日志
-### 1.03
+### 1.03（未来）
+这个版本可能会跳票，但是会在[ccplay](https://github.com/SystemFileB/ccplay)中实现一部分
+
 - 让线程池在处理帧上更高效
 - 现在在生成`cpv(t)`文件前会检查ffmpeg是否可用
 - 优化`consoleplay`命令在播放大文件时的内存占用
 - 移除了Herobrine
+
+### 1.02.1
+- 因改了许可证，在这里我进一步增强了FFmpeg的许可证合规性，它的许可证先已包含在在Windows版`console-player`包中的`/console_player_tools/ffmpeg.exe.license.md`中
 
 ### 1.02
 - **从此版本开始，使用MPL 2.0许可证，以前的版本使用LGPL 3.0许可证**
