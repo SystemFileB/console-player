@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: 检查代码
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: 设置 Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: '3.x'
 
@@ -37,25 +37,25 @@ jobs:
         python setup.py sdist
 
     - name: 上传 Artifact noffmpeg版本
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: consoleplay-snapshot-windows-noffmpeg
         path: dist/console_player_noffmpeg*.whl
     
     - name: 上传 Artifact windows版本
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: consoleplay-snapshot-windows
         path: dist/console_player*-win_amd64.whl
 
     - name: 上传 Artifact 其他版本
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: consoleplay-snapshot-linux
         path: dist/console_player*-any.whl
 
     - name: 上传 Artifact 源代码
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: mctoast-snapshot-source
         path: dist/*.tar.gz
