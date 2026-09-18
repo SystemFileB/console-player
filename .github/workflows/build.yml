@@ -6,7 +6,7 @@ on:
       - main  # 假设您的主分支是 main
 
 jobs:
-  mctoast-snapshot-builder:
+  console-player-snapshot-builder:
     runs-on: ubuntu-latest
 
     steps:
