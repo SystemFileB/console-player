@@ -89,13 +89,19 @@ $ python setup.py bdist_wheel --others
 最后，把这个目录的所有内容压缩到7z文件，把后缀一改，搞定！
 
 ## 📝 更新日志
-### 1.03（未来）
-这个版本可能会跳票，但是会在[ccplay](https://github.com/SystemFileB/ccplay)中实现一部分
+### 1.10（未来）
+跳票，但是会在 ~~[ccplay](https://github.com/SystemFileB/ccplay)中实现一部分~~  
+我觉得用 C++ 实现可能较难，用 Rust 实现可能简单点？  
+等到以后想到了再去用 Rust 重写这个吧
 
 - 让线程池在处理帧上更高效
 - 现在在生成`cpv(t)`文件前会检查ffmpeg是否可用
 - 优化`consoleplay`命令在播放大文件时的内存占用
 - 移除了Herobrine
+
+### 1.03
+- 由于 pygame 已经 2 年没更，所以这个依赖被我改成了 pygame-ce
+- 更新在 Windows 上的内置 FFmpeg 版本
 
 ### 1.02.1
 - 因改了许可证，在这里我进一步增强了FFmpeg的许可证合规性，它的许可证先已包含在在Windows版`console-player`包中的`/console_player_tools/ffmpeg.exe.license.md`中

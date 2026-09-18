@@ -3,7 +3,7 @@ from colorama import Fore
 __version__=cp.version
 def main():
     if len(sys.argv)>1:
-        print(cp.pic2terminal(sys.argv[1]),try_rgba=True)
+        print(cp.pic2terminal(sys.argv[1],try_rgba=True))
     else:
         print(f"""╭───────────────────╮  ConsolePlay {cp.version}
 │ {Fore.BLUE}│╲{Fore.RESET}                │  By: SystemFileB和其他贡献者们

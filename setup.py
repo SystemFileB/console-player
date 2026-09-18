@@ -55,7 +55,7 @@ setuptools.setup(
         "tqdm",
         "Pillow",
         "colorama",
-        "pygame"
+        "pygame-ce"
     ],
     platforms=platforms,
     options=options,
